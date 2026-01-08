@@ -8,15 +8,17 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&amp;display=swap');
       .term { font-family: 'Fira Code', monospace; white-space: pre; }
-      .cyan { fill: #00f2ff; filter: url(#glow); }
-      .magenta { fill: #ff00ff; filter: url(#glow); }
-      .red { fill: #ff5c57; filter: url(#glow); }
-      .green { fill: #00ff94; filter: url(#glow); }
-      .dim { fill: #333d4d; }
-      .white { fill: #e6edf3; }
-      .line-num { fill: #3b4252; font-size: 10px; text-anchor: end; }
       
-      /* --- ANIMAÇÕES --- */
+      /* CORES MODO CLARO (WHITE MODE) - Ajustadas para contraste */
+      .cyan { fill: #008891; filter: url(#glow); }     /* Ciano mais escuro */
+      .magenta { fill: #b000b0; filter: url(#glow); }  /* Magenta mais escuro */
+      .red { fill: #d73a49; filter: url(#glow); }      /* Vermelho github light */
+      .green { fill: #22863a; filter: url(#glow); }    /* Verde github light */
+      .dim { fill: #6e7781; }                          /* Cinza médio */
+      .white { fill: #24292e; }                        /* Texto principal (quase preto) */
+      .line-num { fill: #959da5; font-size: 10px; text-anchor: end; }
+      
+      /* --- ANIMAÇÕES (MANTIDAS ORIGINAIS) --- */
       @keyframes glitch { 0%, 100% { transform: translate(0); opacity: 1; } 92% { transform: translate(0); opacity: 1; } 94% { transform: translate(-3px, 1px); opacity: 0.8; } 96% { transform: translate(3px, -1px); opacity: 0.9; } 98% { transform: translate(-1px, -2px); opacity: 0.8; } }
       .ascii-glitch { animation: glitch 4s infinite; }
 
@@ -24,14 +26,14 @@
       .flicker-text { animation: flicker 3s infinite; }
 
       @keyframes bar-move { 0%, 100% { height: 25px; transform: translateY(0); } 50% { height: 50px; transform: translateY(-25px); } }
-      .bar1 { animation: bar-move 1.2s infinite ease-in-out; }
-      .bar2 { animation: bar-move 1.8s infinite ease-in-out; }
+      .bar1 { animation: bar-move 1.2s infinite ease-in-out; fill: #d0d7de; }
+      .bar2 { animation: bar-move 1.8s infinite ease-in-out; fill: #d0d7de; }
       .bar3 { animation: bar-move 1.5s infinite ease-in-out; }
       .bar4 { animation: bar-move 2.1s infinite ease-in-out; }
 
       @keyframes tabContent { 0%, 23% { opacity: 1; visibility: visible; } 25%, 100% { opacity: 0; visibility: hidden; } }
       @keyframes highlightMove { 0%, 23% { transform: translateX(0); } 25%, 48% { transform: translateX(95px); } 50%, 73% { transform: translateX(190px); } 75%, 98% { transform: translateX(285px); } }
-      @keyframes textActive { 0%, 23% { fill: #ffffff; opacity: 1; filter: url(#glow); } 25%, 100% { fill: #333d4d; opacity: 0.6; filter: none; } }
+      @keyframes textActive { 0%, 23% { fill: #24292e; opacity: 1; filter: url(#glow); } 25%, 100% { fill: #6e7781; opacity: 0.6; filter: none; } }
       
       #content-1 { animation: tabContent 24s infinite 0s; }
       #content-2 { animation: tabContent 24s infinite -18s; }
@@ -43,7 +45,7 @@
       #t3 { animation: textActive 24s infinite -12s; }
       #t4 { animation: textActive 24s infinite -6s; }
       
-      .cursor { animation: blink 1s infinite; fill: #ff00ff; }
+      .cursor { animation: blink 1s infinite; fill: #b000b0; }
       @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
       @keyframes dots { 0%, 20% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
       .dot1 { animation: dots 1.5s infinite 0s; }
@@ -52,11 +54,11 @@
     </style>
   </defs>
 
-  <rect width="100%" height="100%" fill="#0d1117" rx="10"/>
-  <text x="50%" y="60%" text-anchor="middle" font-size="280" fill="#fff" opacity="0.02" style="font-family: serif;">天使</text>
+  <rect width="100%" height="100%" fill="#ffffff" rx="10"/>
+  <text x="50%" y="60%" text-anchor="middle" font-size="280" fill="#000000" opacity="0.03" style="font-family: serif;">天使</text>
 
   <g transform="translate(0, 0)">
-    <path d="M0,10 a10,10 0 0,1 10,-10 h780 a10,10 0 0,1 10,10 v20 h-800 z" fill="#161b22"/>
+    <path d="M0,10 a10,10 0 0,1 10,-10 h780 a10,10 0 0,1 10,10 v20 h-800 z" fill="#f6f8fa"/>
     <circle cx="20" cy="15" r="5" fill="#ff5f56"/>
     <circle cx="40" cy="15" r="5" fill="#ffbd2e"/>
     <circle cx="60" cy="15" r="5" fill="#27c93f"/>
@@ -82,8 +84,8 @@
   </g>
 
   <g transform="translate(30, 200)">
-    <line x1="0" y1="35" x2="740" y2="35" stroke="#30363d" stroke-width="1"/>
-    <rect id="tab-hl" x="0" y="0" width="90" height="30" fill="#1f242c" rx="6" stroke="#444c56" stroke-width="0.5"/>
+    <line x1="0" y1="35" x2="740" y2="35" stroke="#d0d7de" stroke-width="1"/>
+    <rect id="tab-hl" x="0" y="0" width="90" height="30" fill="#f6f8fa" rx="6" stroke="#d0d7de" stroke-width="0.5"/>
     <g class="term" font-size="11" font-weight="bold">
       <text id="t1" x="45" y="20" text-anchor="middle"> [!] STATUS</text>
       <text id="t2" x="140" y="20" text-anchor="middle">[~] REPOS</text>
@@ -93,7 +95,8 @@
   </g>
 
   <g transform="translate(30, 250)">
-    <rect width="550" height="320" fill="#0d1117" stroke="#30363d" rx="5"/>
+    <rect width="550" height="320" fill="#ffffff" stroke="#d0d7de" rx="5"/>
+    
     <g transform="translate(25, 30)">
       <text x="0" y="20" class="line-num">1</text><text x="0" y="50" class="line-num">2</text>
       <text x="0" y="80" class="line-num">3</text><text x="0" y="110" class="line-num">4</text>
@@ -102,14 +105,14 @@
     </g>
 
     <g transform="translate(45, 30)">
-     <g id="content-1">
+      <g id="content-1">
         <text x="0" y="20" class="term cyan">&gt;&gt; whoami</text>
         <text x="0" y="50" class="term white">operator: <tspan class="magenta">'pedro henrique'</tspan></text>
         <text x="0" y="80" class="term white">username: <tspan class="magenta">'kyl8'</tspan></text>
-        <text x="0" y="110" class="term white">role:     <tspan class="magenta">data-science-student</tspan></text>
+        <text x="0" y="110" class="term white">role:     <tspan class="magenta">data-science-student</tspan></text>
         <text x="0" y="140" class="term cyan">&gt;&gt; cat interests.json</text>
         <text x="0" y="170" class="term white">"likes" : {</text>
-        <text x="0" y="200" class="term white">  "to":   [<tspan class="cyan">"code"</tspan>, <tspan class="cyan">"anime"</tspan>, <tspan class="cyan">"games"</tspan>, <tspan class="cyan">"mariana"</tspan>]</text>
+        <text x="0" y="200" class="term white">  "to":   [<tspan class="cyan">"code"</tspan>, <tspan class="cyan">"anime"</tspan>, <tspan class="cyan">"games"</tspan>, <tspan class="cyan">"mariana"</tspan>]</text>
         <text x="0" y="230" class="term white">}</text>
       </g>
 
@@ -118,8 +121,8 @@
         <text x="0" y="50" class="term white">repos: <tspan id="repo_data" class="magenta">14</tspan> | stars: <tspan id="star_data" class="magenta">1</tspan> | prs: <tspan id="prs" class="magenta">--</tspan></text>
         <text x="0" y="80" class="term white">commits: <tspan id="commit_data" class="magenta">123</tspan> | loc: <tspan id="loc_data" class="magenta">0</tspan></text>
         <text x="0" y="110" class="term cyan">&gt;&gt; ls languages/</text>
-        <rect x="0" y="133" width="400" height="5" fill="#161b22" rx="4"/>
-        <rect x="0" y="133" width="180" height="5" fill="#ff00ff" rx="4"/>
+        <rect x="0" y="133" width="400" height="5" fill="#d0d7de" rx="4"/>
+        <rect x="0" y="133" width="180" height="5" fill="#b000b0" rx="4"/>
         <text x="0" y="170" class="term dim" font-size="10"><tspan id="languages_data">Python | JavaScript | TypeScript | Rust | C++</tspan></text>
         <text x="0" y="200" class="term cyan">&gt;&gt; cat tech_stack.py</text>
         <text x="0" y="230" class="term white">stack = [<tspan class="cyan">".py"</tspan>, <tspan class="cyan">".js"</tspan>, <tspan class="cyan">".ts"</tspan>, <tspan class="cyan">".rs"</tspan>, <tspan class="cyan">".cpp</tspan>, <tspan class="cyan">".lua"</tspan>]</text>
@@ -128,10 +131,10 @@
        <g id="content-3">
         <text x="0" y="20" class="term cyan">&gt;&gt; cat env-config.json</text>
         <text x="0" y="50" class="term white">"tech" : {</text>
-        <text x="0" y="80" class="term white">  "os":       [<tspan class="cyan">"archlinux"</tspan>, <tspan class="cyan">"windows 10"</tspan>,</text>
-        <text x="0" y="110" class="term white">  "fw":       [<tspan class="cyan">"reactjs"</tspan>, <tspan class="cyan">"flask"</tspan>, <tspan class="cyan">"tanstack"</tspan>],</text>
-        <text x="0" y="140" class="term white">  "data":     [<tspan class="cyan">"pandas"</tspan>, <tspan class="cyan">"matplotlib"</tspan>, <tspan class="cyan">"sql"</tspan>],</text>
-        <text x="0" y="170" class="term white">  "learning": [<tspan class="cyan">"kotlin"</tspan>, <tspan class="cyan">"rust"</tspan>, <tspan class="cyan">"c/c++"</tspan>]</text>
+        <text x="0" y="80" class="term white">  "os":       [<tspan class="cyan">"archlinux"</tspan>, <tspan class="cyan">"windows 10"</tspan>,</text>
+        <text x="0" y="110" class="term white">  "fw":       [<tspan class="cyan">"reactjs"</tspan>, <tspan class="cyan">"flask"</tspan>, <tspan class="cyan">"tanstack"</tspan>],</text>
+        <text x="0" y="140" class="term white">  "data":     [<tspan class="cyan">"pandas"</tspan>, <tspan class="cyan">"matplotlib"</tspan>, <tspan class="cyan">"sql"</tspan>],</text>
+        <text x="0" y="170" class="term white">  "learning": [<tspan class="cyan">"kotlin"</tspan>, <tspan class="cyan">"rust"</tspan>, <tspan class="cyan">"c/c++"</tspan>]</text>
         <text x="0" y="200" class="term white">}</text>
         <text x="0" y="230" class="term dim" font-size="12">loading more<tspan class="dot1">.</tspan><tspan class="dot2">.</tspan><tspan class="dot3">.</tspan></text>
       </g> 
@@ -149,30 +152,30 @@
     </g>
 
     <g transform="translate(570, 0)">
-      <rect width="180" height="320" fill="#0d1117" stroke="#30363d" rx="5"/>
+      <rect width="180" height="320" fill="#ffffff" stroke="#d0d7de" rx="5"/>
       <text x="15" y="25" class="term cyan flicker-text" font-size="10" font-weight="bold">SYSTEM_MONITOR</text>
       <g transform="translate(15, 50)">
         <text x="0" y="0" class="term dim" font-size="9">COGNITIVE_LOAD</text>
-        <rect x="0" y="8" width="150" height="4" fill="#161b22" rx="2"/>
-        <rect x="0" y="8" width="120" height="4" fill="#ff00ff" rx="2" class="flicker-text"/>
+        <rect x="0" y="8" width="150" height="4" fill="#d0d7de" rx="2"/>
+        <rect x="0" y="8" width="120" height="4" fill="#b000b0" rx="2" class="flicker-text"/>
         <text x="0" y="35" class="term dim" font-size="9">NETWORK_SIGNAL</text>
-        <rect x="0" y="43" width="150" height="4" fill="#161b22" rx="2"/>
-        <rect x="0" y="43" width="100" height="4" fill="#00f2ff" rx="2" class="flicker-text"/>
+        <rect x="0" y="43" width="150" height="4" fill="#d0d7de" rx="2"/>
+        <rect x="0" y="43" width="100" height="4" fill="#008891" rx="2" class="flicker-text"/>
         <text x="0" y="80" class="term magenta" font-size="10" font-weight="bold">&gt;&gt; SECURE_NODE</text>
         <text x="0" y="100" class="term white" font-size="9">IP: 192.168.0.104</text>
         <text x="0" y="115" class="term white" font-size="9">LAT: 12ms</text>
         
         <g transform="translate(0, 160)">
-          <rect x="0" y="30" width="12" height="40" fill="#30363d" rx="1" class="bar1"/>
-          <rect x="25" y="10" width="12" height="60" fill="#30363d" rx="1" class="bar2"/>
-          <rect x="50" y="45" width="12" height="25" fill="#00f2ff" rx="1" opacity="0.6" class="bar3"/>
-          <rect x="75" y="35" width="12" height="35" fill="#ff00ff" rx="1" opacity="0.6" class="bar4"/>
+          <rect x="0" y="30" width="12" height="40" fill="#d0d7de" rx="1" class="bar1"/>
+          <rect x="25" y="10" width="12" height="60" fill="#d0d7de" rx="1" class="bar2"/>
+          <rect x="50" y="45" width="12" height="25" fill="#008891" rx="1" opacity="0.6" class="bar3"/>
+          <rect x="75" y="35" width="12" height="35" fill="#b000b0" rx="1" opacity="0.6" class="bar4"/>
         </g>
         <text x="0" y="255" class="term cyan" font-size="9">BRAZIL_EAST_S1</text>
       </g>
     </g>
   </g>
 
-  <pattern id="lines" width="100%" height="4" patternUnits="userSpaceOnUse"><rect width="100%" height="2" fill="#000" fill-opacity="0.1"/></pattern>
+  <pattern id="lines" width="100%" height="4" patternUnits="userSpaceOnUse"><rect width="100%" height="2" fill="#000" fill-opacity="0.03"/></pattern>
   <rect width="100%" height="100%" fill="url(#lines)" pointer-events="none" rx="10"/>
 </svg>
