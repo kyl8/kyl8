@@ -162,8 +162,8 @@ def get_total_commits():
 
 def get_total_loc():
     """Get LOC by cloning all public repos locally using cloc"""
+    global LOC_CACHE
     total_loc = 0
-    LOC_CACHE.clear()
 
     url = f'https://api.github.com/users/{USER_NAME}/repos'
     headers = {'Authorization': f'token {os.environ["ACCESS_TOKEN"]}'}
@@ -172,6 +172,7 @@ def get_total_loc():
 
     while True:
         params['page'] = page
+        print(f"DEBUG: Fetching page {page}...")
         response = requests.get(url, headers=headers, params=params)
 
         if response.status_code != 200:
@@ -180,26 +181,42 @@ def get_total_loc():
 
         repos = response.json()
         if not repos:
+            print(f"DEBUG: No more repos on page {page}")
             break
+
+        print(f"DEBUG: Found {len(repos)} repos on page {page}")
 
         for repo in repos:
             if repo is None or not isinstance(repo, dict):
                 continue
 
-            if repo.get('fork') or repo.get('private'):
-                continue
-
             repo_name = repo.get('name')
+            is_fork = repo.get('fork', False)
+            is_private = repo.get('private', False)
             repo_url = repo.get('clone_url')
             branch = repo.get('default_branch', 'main')
 
-            if not repo_name or not repo_url:
+            if repo_name == 'kyl8':
+                print(f"DEBUG: Skipping kyl8 (self repo)")
+                continue
+            
+            if is_fork:
+                print(f"DEBUG: Skipping {repo_name} (fork)")
+                continue
+            
+            if is_private:
+                print(f"DEBUG: Skipping {repo_name} (private)")
                 continue
 
-            print(f"DEBUG: Cloning {repo_name}")
+            if not repo_url:
+                print(f"DEBUG: Skipping {repo_name} (no clone_url)")
+                continue
 
+            print(f"DEBUG: Processing {repo_name}...")
             loc, langs = count_loc_with_cloc(repo_url, branch)
+            
             if loc <= 0:
+                print(f"DEBUG: {repo_name} returned 0 LOC, skipping cache")
                 continue
 
             LOC_CACHE[repo_name] = langs
@@ -211,6 +228,7 @@ def get_total_loc():
         page += 1
 
     print(f"\nDEBUG: TOTAL LOC (cloc only): {total_loc}")
+    print(f"DEBUG: LOC_CACHE has {len(LOC_CACHE)} repos")
     return total_loc
 
 
