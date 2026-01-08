@@ -1,3 +1,5 @@
+#MODIFIED TODAY.PY CODE TO USE CLOC INSTEAD OF GITHUB'S API FOR LOC COUNTING AND TO EDIT MY PERSONAL SVG
+#CODE CREDITS AND GITHUB API INTEGRATION GOES TO https://github.com/Andrew6rant/
 import datetime
 from dateutil import relativedelta
 import requests
