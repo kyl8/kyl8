@@ -14,6 +14,7 @@ import shutil
 
 
 BIRTHDAY = datetime.datetime(2004, 10, 29)
+
 try:
     from dotenv import load_dotenv
     load_dotenv() 
@@ -220,6 +221,7 @@ def count_loc_with_cloc(repo_url, branch, ignore_langs):
         )
         
         if result.returncode != 0:
+            print(f"    git clone failed: {result.stderr}")
             return 0
         
         ignore_str = ','.join(ignore_langs)
@@ -228,14 +230,17 @@ def count_loc_with_cloc(repo_url, branch, ignore_langs):
             capture_output=True, timeout=60, text=True
         )
         
-        if result.returncode == 0:
+        if result.returncode == 0 and result.stdout:
             try:
                 cloc_data = json.loads(result.stdout)
-                return cloc_data.get('SUM', {}).get('code', 0)
-            except json.JSONDecodeError:
+                loc_count = cloc_data.get('SUM', {}).get('code', 0)
+                return int(loc_count) if loc_count else 0
+            except (json.JSONDecodeError, ValueError) as e:
+                print(f"    JSON parse error: {e}")
                 return 0
-        
-        return 0
+        else:
+            print(f"    cloc error: {result.stderr}")
+            return 0
     except subprocess.TimeoutExpired:
         print(f"    cloc timeout")
         return 0
@@ -464,9 +469,6 @@ def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, loc_dat
     find_and_replace(root, 'repo_data', repo_data)
     find_and_replace(root, 'loc_data', loc_data)
     find_and_replace(root, 'uptime_data', uptime_data)
-    find_and_replace(root, 'bio_data', USER_BIO)
-    find_and_replace(root, 'prog_lang_data', PROG_LANGUAGES)
-    find_and_replace(root, 'real_lang_data', SPOKEN_LANGUAGES)
     if top_languages:
         find_and_replace(root, 'languages_data', top_languages)
 
