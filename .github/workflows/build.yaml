@@ -61,6 +61,5 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions[bot]"
-          git add dark_mode.svg light_mode.svg
-          git commit -m "chore: update stats [skip ci]"
+          git add dark_mode.svg light_mode.svg          git commit -m "chore: update stats [skip ci]"
           git push
