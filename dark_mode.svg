@@ -116,11 +116,11 @@
       <g id="content-2">
         <text x="0" y="20" class="term cyan">&gt;&gt; fetch --github-stats</text>
         <text x="0" y="50" class="term white">repos: <tspan id="repo_data" class="magenta">14</tspan> | stars: <tspan id="star_data" class="magenta">1</tspan> | prs: <tspan id="prs" class="magenta">--</tspan></text>
-        <text x="0" y="80" class="term white">commits: <tspan id="commit_data" class="magenta">1,094</tspan> | loc: <tspan id="loc_data" class="magenta">0</tspan></text>
+        <text x="0" y="80" class="term white">commits: <tspan id="commit_data" class="magenta">123</tspan> | loc: <tspan id="loc_data" class="magenta">0</tspan></text>
         <text x="0" y="110" class="term cyan">&gt;&gt; ls languages/</text>
         <rect x="0" y="133" width="400" height="5" fill="#161b22" rx="4"/>
         <rect x="0" y="133" width="180" height="5" fill="#ff00ff" rx="4"/>
-        <text x="0" y="170" class="term dim" font-size="10"><tspan id="languages_data">C++ 69% | C 22% | JavaScript 5% | Rust 0% | Python 0%</tspan></text>
+        <text x="0" y="170" class="term dim" font-size="10"><tspan id="languages_data">Python | JavaScript | TypeScript | Rust | C++</tspan></text>
         <text x="0" y="200" class="term cyan">&gt;&gt; cat tech_stack.py</text>
         <text x="0" y="230" class="term white">stack = [<tspan class="cyan">".py"</tspan>, <tspan class="cyan">".js"</tspan>, <tspan class="cyan">".ts"</tspan>, <tspan class="cyan">".rs"</tspan>, <tspan class="cyan">".cpp</tspan>, <tspan class="cyan">".lua"</tspan>]</text>
       </g>

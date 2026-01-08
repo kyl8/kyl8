@@ -5,14 +5,12 @@ from dateutil import relativedelta
 import requests
 import os
 from lxml import etree
-import time
-import hashlib
 import subprocess
 import json
 import tempfile
 import shutil
 
-
+print("DEBUG: SCRIPT VERSION = cloc-only FINAL")
 BIRTHDAY = datetime.datetime(2004, 10, 29)
 
 try:
@@ -21,13 +19,45 @@ try:
 except ImportError:
     pass 
 
+IS_GITHUB_ACTIONS = os.environ.get('GITHUB_ACTIONS') == 'true'
+
 if 'ACCESS_TOKEN' not in os.environ:
-    print("ERRO CRÍTICO: 'ACCESS_TOKEN' não encontrado.")
+    if not IS_GITHUB_ACTIONS:
+        print("AVISO: 'ACCESS_TOKEN' não encontrado. Use arquivo .env para desenvolvimento local.")
+    else:
+        print("ERRO CRÍTICO: 'ACCESS_TOKEN' não encontrado no GitHub Actions.")
+        exit(1)
+
+if 'USER_NAME' not in os.environ:
+    if not IS_GITHUB_ACTIONS:
+        print("AVISO: 'USER_NAME' não encontrado. Use arquivo .env para desenvolvimento local.")
+    else:
+        print("ERRO CRÍTICO: 'USER_NAME' não encontrado no GitHub Actions.")
+        exit(1)
+
+if not os.environ.get('ACCESS_TOKEN'):
+    print("ERRO: 'ACCESS_TOKEN' não configurado.")
+    exit(1)
+
+if not os.environ.get('USER_NAME'):
+    print("ERRO: 'USER_NAME' não configurado.")
     exit(1)
 
 HEADERS = {'authorization': 'token '+ os.environ['ACCESS_TOKEN']}
 USER_NAME = os.environ['USER_NAME']
-QUERY_COUNT = {'user_getter': 0, 'graph_repos_stars': 0, 'recursive_loc': 0, 'graph_commits': 0, 'loc_query': 0}
+
+REAL_LANGUAGES = {
+    'Python', 'JavaScript', 'TypeScript', 'C++', 'C', 'Rust', 'Go', 'Java', 'C#',
+    'Ruby', 'PHP', 'Swift', 'Kotlin', 'Objective-C', 'Objective-C++', 'Perl', 'Lua',
+    'Haskell', 'Clojure', 'Scala', 'Groovy', 'R', 'MATLAB', 'Fortran', 'Cobol',
+    'CUDA', 'Verilog', 'SystemVerilog', 'VHDL', 'Assembly', 'x86 Assembly',
+    'Elixir', 'Erlang', 'Lisp', 'Scheme', 'Racket', 'Julia', 'Nim', 'Zig',
+    'Crystal', 'D', 'Pascal', 'Delphi', 'Ada', 'Bash', 'Shell',
+    'Bourne Shell', 'C Shell', 'Zsh', 'Fish Shell', 'PowerShell', 'Batch',
+    'JSX', 'TSX', 'VB.NET', 'Visual Basic', 'F#', 'OCaml', 'SML'
+}
+
+LOC_CACHE = {}
 
 
 def daily_readme(birthday):
@@ -44,49 +74,16 @@ def format_uptime(birthday):
         parts.append(f"{diff.months} month{'' if diff.months == 1 else 's'}")
     if diff.days > 0:
         parts.append(f"{diff.days} day{'' if diff.days == 1 else 's'}")
-    
     return ', '.join(parts) if parts else "0 days"
 
 
-def format_plural(unit):
-    return 's' if unit != 1 else ''
-
-
 def simple_request(func_name, query, variables):
-    request = requests.post('https://api.github.com/graphql', json={'query': query, 'variables':variables}, headers=HEADERS)
+    request = requests.post('https://api.github.com/graphql', json={'query': query, 'variables': variables}, headers=HEADERS)
     if request.status_code == 200:
         return request
+    print(f"DEBUG: Request to {func_name} failed with status {request.status_code}")
+    print(f"DEBUG: Response: {request.text[:200]}")
     raise Exception(func_name, ' has failed', request.status_code)
-
-
-def graph_commits(start_date, end_date):
-    query_count('graph_commits')
-    query = '''
-    query($start_date: DateTime!, $end_date: DateTime!, $login: String!) {
-        user(login: $login) {
-            contributionsCollection(from: $start_date, to: $end_date) {
-                contributionCalendar { totalContributions }
-            }
-        }
-    }'''
-    variables = {'start_date': start_date,'end_date': end_date, 'login': USER_NAME}
-    try:
-        request = simple_request(graph_commits.__name__, query, variables)
-        data = request.json()
-        
-        if 'errors' in data:
-            print(f"GraphQL Error: {data['errors']}")
-            return 0
-        
-        contrib = data['data']['user']['contributionsCollection']
-        if contrib is None:
-            print("contributionsCollection is None, trying alternative query")
-            return 0
-        
-        return int(contrib['contributionCalendar']['totalContributions'])
-    except Exception as e:
-        print(f"Error in graph_commits: {e}")
-        return 0
 
 
 def get_total_commits():
@@ -126,214 +123,124 @@ def get_total_commits():
                 print(f"GraphQL errors in get_total_commits: {data['errors']}")
                 break
             
-            repos = data['data']['user']['repositories']
-            
-            for edge in repos['edges']:
-                if edge['node']['defaultBranchRef'] and edge['node']['defaultBranchRef']['target']:
-                    history = edge['node']['defaultBranchRef']['target'].get('history', {})
-                    if history:
-                        total_commits += history.get('totalCount', 0)
-            
-            if not repos['pageInfo']['hasNextPage']:
+            user_data = data.get('data')
+            if not user_data:
                 break
             
-            cursor = repos['pageInfo']['endCursor']
+            repos = user_data.get('user', {}).get('repositories', {})
+            if not repos:
+                break
+            
+            edges = repos.get('edges', [])
+            
+            for edge in edges:
+                node = edge.get('node')
+                if not node:
+                    continue
+                branch_ref = node.get('defaultBranchRef')
+                if branch_ref:
+                    target = branch_ref.get('target')
+                    if target:
+                        history = target.get('history', {})
+                        if history:
+                            total_commits += history.get('totalCount', 0)
+            
+            page_info = repos.get('pageInfo', {})
+            if not page_info.get('hasNextPage', False):
+                break
+            
+            cursor = page_info.get('endCursor')
         
         print(f"DEBUG: Total commits in own repos: {total_commits}")
         return total_commits
     except Exception as e:
         print(f"Error calculating commits: {e}")
+        import traceback
+        traceback.print_exc()
         return 0
 
 
 def get_total_loc():
-    ignore_langs = ['JSON', 'YAML', 'XML', 'Markdown', 'HTML', 'CSS', 'SCSS', 'Sass', 
-                    'TOML', 'INI', 'Properties', 'Dockerfile', 'Makefile']
-    
-    query = '''
-    query ($login: String!, $cursor: String) {
-        user(login: $login) {
-            repositories(first: 100, after: $cursor, ownerAffiliations: [OWNER]) {
-                edges {
-                    node {
-                        name
-                        isFork
-                        url
-                        defaultBranchRef {
-                            name
-                        }
-                    }
-                }
-                pageInfo { endCursor hasNextPage }
-            }
-        }
-    }'''
-    
+    """Get LOC by cloning all public repos locally using cloc"""
     total_loc = 0
-    cursor = None
-    
-    try:
-        while True:
-            variables = {'login': USER_NAME, 'cursor': cursor}
-            request = simple_request('get_total_loc', query, variables)
-            data = request.json()
-            
-            if 'errors' in data:
-                print(f"GraphQL errors in get_total_loc: {data['errors']}")
-                break
-            
-            repos = data['data']['user']['repositories']
-            
-            for edge in repos['edges']:
-                repo_name = edge['node']['name']
-                is_fork = edge['node'].get('isFork', False)
-                repo_url = edge['node']['url']
-                default_branch = edge['node'].get('defaultBranchRef', {}).get('name', 'main')
-                if repo_name == 'kyl8' or is_fork:
-                    continue
-                loc_data = count_loc_with_cloc(repo_url, default_branch, ignore_langs)
-                total_loc += loc_data
-                if loc_data > 0:
-                    print(f"  -> {repo_name}: {loc_data} LOC")
-            
-            if not repos['pageInfo']['hasNextPage']:
-                break
-            
-            cursor = repos['pageInfo']['endCursor']
-        
-        print(f"DEBUG: Total LOC (cloc, excluding config files) in own repos: {total_loc}")
-        return total_loc
-    except Exception as e:
-        print(f"Error calculating LOC: {e}")
-        return 0
+    LOC_CACHE.clear()
 
+    url = f'https://api.github.com/users/{USER_NAME}/repos'
+    headers = {'Authorization': f'token {os.environ["ACCESS_TOKEN"]}'}
+    params = {'type': 'owner', 'per_page': 100}
+    page = 1
 
-def count_loc_with_cloc(repo_url, branch, ignore_langs):
-    temp_dir = None
-    try:
-        temp_dir = tempfile.mkdtemp()
-        repo_path = os.path.join(temp_dir, 'repo')
-        
-        auth_url = repo_url.replace('https://', f'https://{os.environ.get("ACCESS_TOKEN")}@')
-        result = subprocess.run(
-            ['git', 'clone', '--branch', branch, '--single-branch', auth_url, repo_path],
-            capture_output=True, timeout=30, text=True
-        )
-        
-        if result.returncode != 0:
-            print(f"    git clone failed: {result.stderr}")
-            return 0
-        
-        ignore_str = ','.join(ignore_langs)
-        result = subprocess.run(
-            ['cloc', repo_path, '--json', '--exclude-lang=' + ignore_str],
-            capture_output=True, timeout=60, text=True
-        )
-        
-        if result.returncode == 0 and result.stdout:
-            try:
-                cloc_data = json.loads(result.stdout)
-                loc_count = cloc_data.get('SUM', {}).get('code', 0)
-                return int(loc_count) if loc_count else 0
-            except (json.JSONDecodeError, ValueError) as e:
-                print(f"    JSON parse error: {e}")
-                return 0
-        else:
-            print(f"    cloc error: {result.stderr}")
-            return 0
-    except subprocess.TimeoutExpired:
-        print(f"    cloc timeout")
-        return 0
-    except Exception as e:
-        print(f"    cloc error: {e}")
-        return 0
-    finally:
-        if temp_dir and os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir, ignore_errors=True)
+    while True:
+        params['page'] = page
+        response = requests.get(url, headers=headers, params=params)
+
+        if response.status_code != 200:
+            print(f"ERROR: Failed to fetch repos ({response.status_code})")
+            break
+
+        repos = response.json()
+        if not repos:
+            break
+
+        for repo in repos:
+            if repo is None or not isinstance(repo, dict):
+                continue
+
+            if repo.get('fork') or repo.get('private'):
+                continue
+
+            repo_name = repo.get('name')
+            repo_url = repo.get('clone_url')
+            branch = repo.get('default_branch', 'main')
+
+            if not repo_name or not repo_url:
+                continue
+
+            print(f"DEBUG: Cloning {repo_name}")
+
+            loc, langs = count_loc_with_cloc(repo_url, branch)
+            if loc <= 0:
+                continue
+
+            LOC_CACHE[repo_name] = langs
+            total_loc += loc
+
+            langs_str = ", ".join(f"{l} ({c})" for l, c in langs)
+            print(f"  -> {repo_name}: {loc} LOC [{langs_str}]")
+
+        page += 1
+
+    print(f"\nDEBUG: TOTAL LOC (cloc only): {total_loc}")
+    return total_loc
 
 
 def get_top_languages(limit=5):
-    query = '''
-    query ($login: String!, $cursor: String) {
-        user(login: $login) {
-            repositories(first: 100, after: $cursor, ownerAffiliations: [OWNER]) {
-                edges {
-                    node {
-                        name
-                        languages(first: 10) {
-                            edges {
-                                node {
-                                    name
-                                }
-                                size
-                            }
-                        }
-                    }
-                }
-                pageInfo { endCursor hasNextPage }
-            }
-        }
-    }'''
-    
-    language_sizes = {}
-    cursor = None
-    
-    try:
-        while True:
-            variables = {'login': USER_NAME, 'cursor': cursor}
-            request = simple_request('get_top_languages', query, variables)
-            data = request.json()
-            
-            if 'errors' in data:
-                print(f"GraphQL errors in get_top_languages: {data['errors']}")
-                break
-            
-            repos = data['data']['user']['repositories']
-            print(f"DEBUG: get_top_languages - processando {len(repos['edges'])} repositórios")
-            
-            for edge in repos['edges']:
-                repo_name = edge['node']['name']
-                languages = edge['node'].get('languages', {}).get('edges', [])
-                repo_langs = []
-                for lang_edge in languages:
-                    lang_name = lang_edge['node']['name']
-                    size = lang_edge.get('size', 0)
-                    language_sizes[lang_name] = language_sizes.get(lang_name, 0) + size
-                    size_kb = size / 1024
-                    repo_langs.append(f"{lang_name} ({size_kb:.1f} KB)")
-                print(f"  -> {repo_name}: {', '.join(repo_langs) if repo_langs else 'No languages'}")
-            
-            if not repos['pageInfo']['hasNextPage']:
-                break
-            
-            cursor = repos['pageInfo']['endCursor']
-        
-        language_loc = {}
-        for lang_name, size_bytes in language_sizes.items():
-            size_kb = size_bytes / 1024
-            estimated_lines = int(size_kb * 250)
-            language_loc[lang_name] = estimated_lines
-        sorted_langs = sorted(language_loc.items(), key=lambda x: x[1], reverse=True)
-        top_langs = sorted_langs[:limit]
-        total_loc = sum(loc for _, loc in top_langs)
-        lang_percentages = []
-        
-        for lang_name, loc in top_langs:
-            percentage = (loc / total_loc * 100) if total_loc > 0 else 0
-            lang_percentages.append((lang_name, int(percentage)))
-        result = " | ".join([f"{name} {pct}%" for name, pct in lang_percentages])
-        print(f"DEBUG: Top languages by LOC (total repos processed): {result}")
-        sorted_langs_display = [(name, loc) for name, loc in sorted_langs]
-        print(f"DEBUG: Language LOC: {sorted_langs_display}")
-        return result
-    except Exception as e:
-        print(f"Error calculating top languages: {e}")
-        return "Python | JavaScript | TypeScript"
+    if not LOC_CACHE:
+        return "Python | JavaScript | TypeScript | Rust | C++"
+
+    language_totals = {}
+
+    for _, langs in LOC_CACHE.items():
+        for lang, loc in langs:
+            language_totals[lang] = language_totals.get(lang, 0) + loc
+
+    if not language_totals:
+        return "Python | JavaScript | TypeScript | Rust | C++"
+
+    sorted_langs = sorted(language_totals.items(), key=lambda x: x[1], reverse=True)
+    top = sorted_langs[:limit]
+    total = sum(language_totals.values())
+
+    result = " | ".join(
+        f"{lang} {round((loc / total) * 100)}%"
+        for lang, loc in top
+    )
+
+    print(f"DEBUG: Top languages (cloc): {result}")
+    return result
 
 
-def graph_repos_stars(count_type, cursor=None, total_stars=0, total_repos=0):
-    query_count('graph_repos_stars')
-    
+def graph_repos_stars(count_type, cursor=None, total_stars=0):
     query = '''
     query ($login: String!, $cursor: String) {
         user(login: $login) {
@@ -353,7 +260,7 @@ def graph_repos_stars(count_type, cursor=None, total_stars=0, total_repos=0):
     variables = {'login': USER_NAME, 'cursor': cursor}
     
     try:
-        request = simple_request(graph_repos_stars.__name__, query, variables)
+        request = simple_request('graph_repos_stars', query, variables)
         data = request.json()
         if cursor is None:  
             print(f"DEBUG: User {USER_NAME} repositories response received")
@@ -362,104 +269,44 @@ def graph_repos_stars(count_type, cursor=None, total_stars=0, total_repos=0):
             print(f"DEBUG: GraphQL errors: {data['errors']}")
             return 0
         
-        repos = data['data']['user']['repositories']
+        user_data = data.get('data')
+        if not user_data:
+            return 0
+        
+        repos = user_data.get('user', {}).get('repositories', {})
+        if not repos:
+            return 0
         
         if count_type == 'repos':
-            return repos['totalCount']
+            return repos.get('totalCount', 0)
         elif count_type == 'stars':
-            for edge in repos['edges']:
-                stars = edge['node']['stargazerCount']
-                total_stars += stars
-                if stars > 0:
-                    print(f"DEBUG: {edge['node']['name']} has {stars} stars")
-            if repos['pageInfo']['hasNextPage']:
-                next_cursor = repos['pageInfo']['endCursor']
-                return graph_repos_stars(count_type, next_cursor, total_stars, total_repos)
+            edges = repos.get('edges', [])
+            for edge in edges:
+                node = edge.get('node')
+                if node:
+                    stars = node.get('stargazerCount', 0)
+                    total_stars += stars
+                    if stars > 0:
+                        print(f"DEBUG: {node.get('name', 'unknown')} has {stars} stars")
+            
+            page_info = repos.get('pageInfo', {})
+            if page_info.get('hasNextPage', False):
+                return graph_repos_stars(count_type, page_info.get('endCursor'), total_stars)
             
             print(f"DEBUG: Total stars found: {total_stars}")
             return total_stars
     except Exception as e:
         print(f"DEBUG: Error in graph_repos_stars: {e}")
+        import traceback
+        traceback.print_exc()
         return 0
     
     return 0
 
 
-def recursive_loc(owner, repo_name, data, cache_comment, addition_total=0, deletion_total=0, my_commits=0, cursor=None):
-    query_count('recursive_loc')
-    query = '''
-    query ($repo_name: String!, $owner: String!, $cursor: String) {
-        repository(name: $repo_name, owner: $owner) {
-            defaultBranchRef {
-                target {
-                    ... on Commit {
-                        history(first: 100, after: $cursor) {
-                            edges {
-                                node {
-                                    author { user { id } }
-                                    deletions additions
-                                }
-                            }
-                            pageInfo { endCursor hasNextPage }
-                        }
-                    }
-                }
-            }
-        }
-    }'''
-    variables = {'repo_name': repo_name, 'owner': owner, 'cursor': cursor}
-    request = requests.post('https://api.github.com/graphql', json={'query': query, 'variables':variables}, headers=HEADERS)
-    if request.status_code == 200:
-        target = request.json()['data']['repository']['defaultBranchRef']
-        if target:
-            return loc_counter_one_repo(owner, repo_name, data, cache_comment, target['target']['history'], addition_total, deletion_total, my_commits)
-        return 0
-    return 0
-
-
-def loc_counter_one_repo(owner, repo_name, data, cache_comment, history, addition_total, deletion_total, my_commits):
-    for node in history['edges']:
-        if node['node']['author']['user'] and node['node']['author']['user']['id'] == OWNER_ID['id']:
-            my_commits += 1
-            addition_total += node['node']['additions']
-            deletion_total += node['node']['deletions']
-    if not history['pageInfo']['hasNextPage']:
-        return addition_total, deletion_total, my_commits
-    return recursive_loc(owner, repo_name, data, cache_comment, addition_total, deletion_total, my_commits, history['pageInfo']['endCursor'])
-
-
-def loc_query(owner_affiliation, comment_size=0, force_cache=False, cursor=None, edges=[]):
-    query_count('loc_query')
-    query = '''
-    query ($owner_affiliation: [RepositoryAffiliation], $login: String!, $cursor: String) {
-        user(login: $login) {
-            repositories(first: 60, after: $cursor, ownerAffiliations: $owner_affiliation) {
-                edges {
-                    node {
-                        nameWithOwner
-                        defaultBranchRef { target { ... on Commit { history { totalCount } } } }
-                    }
-                }
-                pageInfo { endCursor hasNextPage }
-            }
-        }
-    }'''
-    variables = {'owner_affiliation': owner_affiliation, 'login': USER_NAME, 'cursor': cursor}
-    request = simple_request(loc_query.__name__, query, variables)
-    res = request.json()['data']['user']['repositories']
-    if res['pageInfo']['hasNextPage']:
-        return loc_query(owner_affiliation, comment_size, force_cache, res['pageInfo']['endCursor'], edges + res['edges'])
-    return cache_builder(edges + res['edges'], comment_size, force_cache)
-
-
-def cache_builder(edges, comment_size, force_cache):
-    filename = 'cache/'+hashlib.sha256(USER_NAME.encode('utf-8')).hexdigest()+'.txt'
-    total_add, total_del = 0, 0
-    return [total_add, total_del, total_add - total_del, True]
-
-
 def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, loc_data, uptime_data, top_languages=''):
-    if not os.path.exists(filename): return
+    if not os.path.exists(filename):
+        return
     tree = etree.parse(filename)
     root = tree.getroot()
     
@@ -476,7 +323,8 @@ def svg_overwrite(filename, age_data, commit_data, star_data, repo_data, loc_dat
 
 
 def find_and_replace(root, element_id, new_text):
-    if isinstance(new_text, int): new_text = f"{new_text:,}"
+    if isinstance(new_text, int):
+        new_text = f"{new_text:,}"
     element = root.find(f".//*[@id='{element_id}']")
     if element is not None:
         tspans = element.findall('.//{http://www.w3.org/2000/svg}tspan')
@@ -488,18 +336,107 @@ def find_and_replace(root, element_id, new_text):
 
 def user_getter(username):
     query = 'query($login: String!){ user(login: $login) { id createdAt } }'
-    request = simple_request('user_getter', query, {'login': username})
-    return {'id': request.json()['data']['user']['id']}, request.json()['data']['user']['createdAt']
+    try:
+        request = simple_request('user_getter', query, {'login': username})
+        data = request.json()
+        
+        if 'errors' in data:
+            print(f"GraphQL Error in user_getter: {data['errors']}")
+            return None, None
+        
+        user_data = data.get('data', {}).get('user')
+        if not user_data:
+            print("No user data returned from GraphQL")
+            return None, None
+        
+        user_id = user_data.get('id')
+        created_at = user_data.get('createdAt')
+        
+        if not user_id:
+            print("User ID is None")
+            return None, None
+        
+        return {'id': user_id}, created_at
+    except Exception as e:
+        print(f"Error in user_getter: {e}")
+        import traceback
+        traceback.print_exc()
+        return None, None
 
 
-def query_count(funct_id):
-    global QUERY_COUNT
-    QUERY_COUNT[funct_id] += 1
-
+def count_loc_with_cloc(repo_url, branch):
+    temp_dir = None
+    try:
+        temp_dir = tempfile.mkdtemp()
+        repo_path = os.path.join(temp_dir, 'repo')
+        
+        auth_url = repo_url.replace('https://', f'https://{os.environ.get("ACCESS_TOKEN")}@')
+        result = subprocess.run(
+            ['git', 'clone', '--branch', branch, '--single-branch', '--depth', '1', auth_url, repo_path],
+            capture_output=True, timeout=30, text=True
+        )
+        
+        if result.returncode != 0:
+            print(f"      [SKIPPED] Failed to clone repo")
+            return 0, []
+        
+        result = subprocess.run(
+            ['cloc', repo_path, '--json', '--exclude-dir=.git,.github,node_modules,vendor'],
+            capture_output=True, timeout=90, text=True
+        )
+        
+        if result.returncode == 0 and result.stdout:
+            try:
+                cloc_data = json.loads(result.stdout)
+                lang_breakdown = []
+                total_code = 0
+                
+                for lang_key, lang_data in cloc_data.items():
+                    if lang_key not in ('SUM', 'header'):
+                        if isinstance(lang_data, dict) and 'code' in lang_data:
+                            code_lines = lang_data.get('code', 0)
+                            if code_lines > 0 and lang_key in REAL_LANGUAGES:
+                                lang_breakdown.append((lang_key, code_lines))
+                                total_code += code_lines
+                
+                lang_breakdown.sort(key=lambda x: x[1], reverse=True)
+                return int(total_code), lang_breakdown
+            except (json.JSONDecodeError, ValueError):
+                print(f"      [SKIPPED] Failed to parse cloc output")
+                return 0, []
+        else:
+            print(f"      [SKIPPED] cloc failed")
+            return 0, []
+    except subprocess.TimeoutExpired:
+        print(f"      [SKIPPED] Clone or cloc timeout")
+        return 0, []
+    except Exception as e:
+        print(f"      [SKIPPED] Unexpected error: {e}")
+        return 0, []
+    finally:
+        if temp_dir and os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 if __name__ == '__main__':
+    env_type = "GitHub Actions" if IS_GITHUB_ACTIONS else "Local"
+    print(f"DEBUG: Executando em: {env_type}")
+    
+    if not os.environ.get('ACCESS_TOKEN') or os.environ.get('ACCESS_TOKEN').strip() == '':
+        print("ERRO: 'ACCESS_TOKEN' está vazio ou não configurado.")
+        exit(1)
+    
+    if not os.environ.get('USER_NAME') or os.environ.get('USER_NAME').strip() == '':
+        print("ERRO: 'USER_NAME' está vazio ou não configurado.")
+        exit(1)
+    
+    print(f"DEBUG: Iniciando script com USER_NAME: {USER_NAME}")
+    print(f"DEBUG: ACCESS_TOKEN primeiros 10 chars: {os.environ.get('ACCESS_TOKEN')[:10]}...")
+    
     user_data, _ = user_getter(USER_NAME)
-    OWNER_ID = user_data
+    
+    if user_data is None:
+        print("ERRO: Não foi possível obter dados do usuário. Verifique ACCESS_TOKEN e USER_NAME.")
+        exit(1)
     
     age_str = daily_readme(BIRTHDAY)
     uptime_str = format_uptime(BIRTHDAY)
@@ -510,7 +447,7 @@ if __name__ == '__main__':
     top_langs = get_top_languages()
 
     print(f"DEBUG: Consultando usuário: {USER_NAME}")
-    print(f"DEBUG: USER_ID: {OWNER_ID['id']}")
+    print(f"DEBUG: USER_ID: {user_data['id']}")
     
     svg_overwrite('dark_mode.svg', age_str, commits, stars, repos, loc_total, uptime_str, top_langs)
     svg_overwrite('light_mode.svg', age_str, commits, stars, repos, loc_total, uptime_str, top_langs)
