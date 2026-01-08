@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&amp;display=swap');
+      .term { font-family: 'Fira Code', monospace; white-space: pre; }
+      .cyan { fill: #00f2ff; filter: url(#glow); }
+      .magenta { fill: #ff00ff; filter: url(#glow); }
+      .red { fill: #ff5c57; filter: url(#glow); }
+      .green { fill: #00ff94; filter: url(#glow); }
+      .dim { fill: #333d4d; }
+      .white { fill: #e6edf3; }
+      .line-num { fill: #3b4252; font-size: 10px; text-anchor: end; }
+      
+      /* --- ANIMAÇÕES --- */
+      @keyframes glitch { 0%, 100% { transform: translate(0); opacity: 1; } 92% { transform: translate(0); opacity: 1; } 94% { transform: translate(-3px, 1px); opacity: 0.8; } 96% { transform: translate(3px, -1px); opacity: 0.9; } 98% { transform: translate(-1px, -2px); opacity: 0.8; } }
+      .ascii-glitch { animation: glitch 4s infinite; }
+
+      @keyframes flicker { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; } 20%, 24%, 55% { opacity: 0.4; } }
+      .flicker-text { animation: flicker 3s infinite; }
+
+      @keyframes bar-move { 0%, 100% { height: 25px; transform: translateY(0); } 50% { height: 50px; transform: translateY(-25px); } }
+      .bar1 { animation: bar-move 1.2s infinite ease-in-out; }
+      .bar2 { animation: bar-move 1.8s infinite ease-in-out; }
+      .bar3 { animation: bar-move 1.5s infinite ease-in-out; }
+      .bar4 { animation: bar-move 2.1s infinite ease-in-out; }
+
+      @keyframes tabContent { 0%, 23% { opacity: 1; visibility: visible; } 25%, 100% { opacity: 0; visibility: hidden; } }
+      @keyframes highlightMove { 0%, 23% { transform: translateX(0); } 25%, 48% { transform: translateX(95px); } 50%, 73% { transform: translateX(190px); } 75%, 98% { transform: translateX(285px); } }
+      @keyframes textActive { 0%, 23% { fill: #ffffff; opacity: 1; filter: url(#glow); } 25%, 100% { fill: #333d4d; opacity: 0.6; filter: none; } }
+      
+      #content-1 { animation: tabContent 24s infinite 0s; }
+      #content-2 { animation: tabContent 24s infinite -18s; }
+      #content-3 { animation: tabContent 24s infinite -12s; }
+      #content-4 { animation: tabContent 24s infinite -6s; }
+      #tab-hl { animation: highlightMove 24s infinite; }
+      #t1 { animation: textActive 24s infinite 0s; }
+      #t2 { animation: textActive 24s infinite -18s; }
+      #t3 { animation: textActive 24s infinite -12s; }
+      #t4 { animation: textActive 24s infinite -6s; }
+      
+      .cursor { animation: blink 1s infinite; fill: #ff00ff; }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      @keyframes dots { 0%, 20% { opacity: 0; } 40% { opacity: 1; } 100% { opacity: 0; } }
+      .dot1 { animation: dots 1.5s infinite 0s; }
+      .dot2 { animation: dots 1.5s infinite 0.3s; }
+      .dot3 { animation: dots 1.5s infinite 0.6s; }
+    </style>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#0d1117" rx="10"/>
+  <text x="50%" y="60%" text-anchor="middle" font-size="280" fill="#fff" opacity="0.02" style="font-family: serif;">天使</text>
+
+  <g transform="translate(0, 0)">
+    <path d="M0,10 a10,10 0 0,1 10,-10 h780 a10,10 0 0,1 10,10 v20 h-800 z" fill="#161b22"/>
+    <circle cx="20" cy="15" r="5" fill="#ff5f56"/>
+    <circle cx="40" cy="15" r="5" fill="#ffbd2e"/>
+    <circle cx="60" cy="15" r="5" fill="#27c93f"/>
+    <text x="400" y="20" text-anchor="middle" class="term dim" font-size="10">sh - kyl8@arch — 80x24</text>
+  </g>
+
+  <g transform="translate(30, 60)">
+    <g class="ascii-glitch">
+      <text x="0" y="0" class="term cyan" style="font-size: 16px; font-weight: bold;" xml:space="preserve">
+        <tspan x="0" dy="1.1em">██╗  ██╗██╗   ██╗██╗      █████╗ </tspan>
+        <tspan x="0" dy="1.1em">██║ ██╔╝╚██╗ ██╔╝██║     ██╔══██╗</tspan>
+        <tspan x="0" dy="1.1em">█████╔╝  ╚████╔╝ ██║     ╚█████╔╝</tspan>
+        <tspan x="0" dy="1.1em">██╔═██╗   ╚██╔╝  ██║     ██╔══██╗</tspan>
+        <tspan x="0" dy="1.1em">██║  ██╗   ██║   ███████╗╚█████╔╝</tspan>
+        <tspan x="0" dy="1.1em">╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚════╝ </tspan>
+      </text>
+    </g>
+    <g transform="translate(450, 25)" class="flicker-text">
+      <text x="0" y="0" class="term magenta" font-size="12" font-weight="bold">TYPE: HYBRID_RE_DATA_NODE</text>
+      <text x="0" y="22" class="term red" font-size="10">KERNEL: LUNARY-OS v3.5.0-UNSTABLE</text>
+      <text x="0" y="44" class="term green" font-size="10">UPTIME: <tspan id="uptime_data">21 years, 2 months, 10 days</tspan></text>
+    </g>
+  </g>
+
+  <g transform="translate(30, 200)">
+    <line x1="0" y1="35" x2="740" y2="35" stroke="#30363d" stroke-width="1"/>
+    <rect id="tab-hl" x="0" y="0" width="90" height="30" fill="#1f242c" rx="6" stroke="#444c56" stroke-width="0.5"/>
+    <g class="term" font-size="11" font-weight="bold">
+      <text id="t1" x="45" y="20" text-anchor="middle"> [!] STATUS</text>
+      <text id="t2" x="140" y="20" text-anchor="middle">[~] REPOS</text>
+      <text id="t3" x="235" y="20" text-anchor="middle">[#] TOOLS</text>
+      <text id="t4" x="330" y="20" text-anchor="middle">[^] BIO</text>
+    </g>
+  </g>
+
+  <g transform="translate(30, 250)">
+    <rect width="550" height="320" fill="#0d1117" stroke="#30363d" rx="5"/>
+    <g transform="translate(25, 30)">
+      <text x="0" y="20" class="line-num">1</text><text x="0" y="50" class="line-num">2</text>
+      <text x="0" y="80" class="line-num">3</text><text x="0" y="110" class="line-num">4</text>
+      <text x="0" y="140" class="line-num">5</text><text x="0" y="170" class="line-num">6</text>
+      <text x="0" y="200" class="line-num">7</text><text x="0" y="230" class="line-num">8</text>
+    </g>
+
+    <g transform="translate(45, 30)">
+     <g id="content-1">
+        <text x="0" y="20" class="term cyan">&gt;&gt; whoami</text>
+        <text x="0" y="50" class="term white">operator: <tspan class="magenta">'pedro henrique'</tspan></text>
+        <text x="0" y="80" class="term white">username: <tspan class="magenta">'kyl8'</tspan></text>
+        <text x="0" y="110" class="term white">role:     <tspan class="magenta">data-science-student</tspan></text>
+        <text x="0" y="140" class="term cyan">&gt;&gt; cat interests.json</text>
+        <text x="0" y="170" class="term white">"likes" : {</text>
+        <text x="0" y="200" class="term white">  "to":   [<tspan class="cyan">"code"</tspan>, <tspan class="cyan">"anime"</tspan>, <tspan class="cyan">"games"</tspan>, <tspan class="cyan">"mariana"</tspan>]</text>
+        <text x="0" y="230" class="term white">}</text>
+      </g>
+
+      <g id="content-2">
+        <text x="0" y="20" class="term cyan">&gt;&gt; fetch --github-stats</text>
+        <text x="0" y="50" class="term white">repos: <tspan id="repo_data" class="magenta">14</tspan> | stars: <tspan id="star_data" class="magenta">1</tspan> | prs: <tspan id="prs" class="magenta">--</tspan></text>
+        <text x="0" y="80" class="term white">commits: <tspan id="commit_data" class="magenta">1,094</tspan> | loc: <tspan id="loc_data" class="magenta">0</tspan></text>
+        <text x="0" y="110" class="term cyan">&gt;&gt; ls languages/</text>
+        <rect x="0" y="133" width="400" height="5" fill="#161b22" rx="4"/>
+        <rect x="0" y="133" width="180" height="5" fill="#ff00ff" rx="4"/>
+        <text x="0" y="170" class="term dim" font-size="10"><tspan id="languages_data">C++ 69% | C 22% | JavaScript 5% | Rust 0% | Python 0%</tspan></text>
+        <text x="0" y="200" class="term cyan">&gt;&gt; cat tech_stack.py</text>
+        <text x="0" y="230" class="term white">stack = [<tspan class="cyan">".py"</tspan>, <tspan class="cyan">".js"</tspan>, <tspan class="cyan">".ts"</tspan>, <tspan class="cyan">".rs"</tspan>, <tspan class="cyan">".cpp</tspan>, <tspan class="cyan">".lua"</tspan>]</text>
+      </g>
+
+       <g id="content-3">
+        <text x="0" y="20" class="term cyan">&gt;&gt; cat env-config.json</text>
+        <text x="0" y="50" class="term white">"tech" : {</text>
+        <text x="0" y="80" class="term white">  "os":       [<tspan class="cyan">"archlinux"</tspan>, <tspan class="cyan">"windows 10"</tspan>,</text>
+        <text x="0" y="110" class="term white">  "fw":       [<tspan class="cyan">"reactjs"</tspan>, <tspan class="cyan">"flask"</tspan>, <tspan class="cyan">"tanstack"</tspan>],</text>
+        <text x="0" y="140" class="term white">  "data":     [<tspan class="cyan">"pandas"</tspan>, <tspan class="cyan">"matplotlib"</tspan>, <tspan class="cyan">"sql"</tspan>],</text>
+        <text x="0" y="170" class="term white">  "learning": [<tspan class="cyan">"kotlin"</tspan>, <tspan class="cyan">"rust"</tspan>, <tspan class="cyan">"c/c++"</tspan>]</text>
+        <text x="0" y="200" class="term white">}</text>
+        <text x="0" y="230" class="term dim" font-size="12">loading more<tspan class="dot1">.</tspan><tspan class="dot2">.</tspan><tspan class="dot3">.</tspan></text>
+      </g> 
+
+      <g id="content-4">
+        <text x="0" y="20" class="term cyan">&gt;&gt; cat manifesto.md</text>
+        <text x="0" y="50" class="term magenta" font-weight="bold"># THE_ABSURD_EXPLORER</text>
+        <text x="0" y="80" class="term dim">--- status: seeking_knowledge ---</text>
+        <text x="0" y="110" class="term white">&gt; "Accept the absurd, continue anyway."</text>
+        <text x="0" y="140" class="term white">- [x] <tspan class="cyan">Reverse engineer the matrix</tspan></text>
+        <text x="0" y="170" class="term white">- [x] <tspan class="cyan">Low-level and cybersec enthusiast</tspan></text>
+        <text x="0" y="200" class="term white">- [ ] <tspan class="dim">Reach the [REDACTED]</tspan></text>
+      </g>
+      <rect x="0" y="217" width="10" height="18" class="cursor"/>
+    </g>
+
+    <g transform="translate(570, 0)">
+      <rect width="180" height="320" fill="#0d1117" stroke="#30363d" rx="5"/>
+      <text x="15" y="25" class="term cyan flicker-text" font-size="10" font-weight="bold">SYSTEM_MONITOR</text>
+      <g transform="translate(15, 50)">
+        <text x="0" y="0" class="term dim" font-size="9">COGNITIVE_LOAD</text>
+        <rect x="0" y="8" width="150" height="4" fill="#161b22" rx="2"/>
+        <rect x="0" y="8" width="120" height="4" fill="#ff00ff" rx="2" class="flicker-text"/>
+        <text x="0" y="35" class="term dim" font-size="9">NETWORK_SIGNAL</text>
+        <rect x="0" y="43" width="150" height="4" fill="#161b22" rx="2"/>
+        <rect x="0" y="43" width="100" height="4" fill="#00f2ff" rx="2" class="flicker-text"/>
+        <text x="0" y="80" class="term magenta" font-size="10" font-weight="bold">&gt;&gt; SECURE_NODE</text>
+        <text x="0" y="100" class="term white" font-size="9">IP: 192.168.0.104</text>
+        <text x="0" y="115" class="term white" font-size="9">LAT: 12ms</text>
+        
+        <g transform="translate(0, 160)">
+          <rect x="0" y="30" width="12" height="40" fill="#30363d" rx="1" class="bar1"/>
+          <rect x="25" y="10" width="12" height="60" fill="#30363d" rx="1" class="bar2"/>
+          <rect x="50" y="45" width="12" height="25" fill="#00f2ff" rx="1" opacity="0.6" class="bar3"/>
+          <rect x="75" y="35" width="12" height="35" fill="#ff00ff" rx="1" opacity="0.6" class="bar4"/>
+        </g>
+        <text x="0" y="255" class="term cyan" font-size="9">BRAZIL_EAST_S1</text>
+      </g>
+    </g>
+  </g>
+
+  <pattern id="lines" width="100%" height="4" patternUnits="userSpaceOnUse"><rect width="100%" height="2" fill="#000" fill-opacity="0.1"/></pattern>
+  <rect width="100%" height="100%" fill="url(#lines)" pointer-events="none" rx="10"/>
+</svg>
