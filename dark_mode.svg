@@ -128,7 +128,7 @@
        <g id="content-3">
         <text x="0" y="20" class="term cyan">&gt;&gt; cat env-config.json</text>
         <text x="0" y="50" class="term white">"tech" : {</text>
-        <text x="0" y="80" class="term white">  "os":       [<tspan class="cyan">"archlinux"</tspan>, <tspan class="cyan">"windows 10"</tspan>,</text>
+        <text x="0" y="80" class="term white">  "os":       [<tspan class="cyan">"archlinux"</tspan>, <tspan class="cyan">"windows 10"</tspan>],</text>
         <text x="0" y="110" class="term white">  "fw":       [<tspan class="cyan">"reactjs"</tspan>, <tspan class="cyan">"flask"</tspan>, <tspan class="cyan">"tanstack"</tspan>],</text>
         <text x="0" y="140" class="term white">  "data":     [<tspan class="cyan">"pandas"</tspan>, <tspan class="cyan">"matplotlib"</tspan>, <tspan class="cyan">"sql"</tspan>],</text>
         <text x="0" y="170" class="term white">  "learning": [<tspan class="cyan">"kotlin"</tspan>, <tspan class="cyan">"rust"</tspan>, <tspan class="cyan">"c/c++"</tspan>]</text>
