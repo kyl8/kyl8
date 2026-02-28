@@ -77,7 +77,7 @@
     <g transform="translate(450, 25)" class="flicker-text">
       <text x="0" y="0" class="term magenta" font-size="12" font-weight="bold">TYPE: HYBRID_RE_DATA_NODE</text>
       <text x="0" y="22" class="term red" font-size="10">KERNEL: LUNARY-OS v3.5.0-UNSTABLE</text>
-      <text x="0" y="44" class="term green" font-size="10">UPTIME: <tspan id="uptime_data">21 years, 3 months, 29 days</tspan></text>
+      <text x="0" y="44" class="term green" font-size="10">UPTIME: <tspan id="uptime_data">21 years, 4 months</tspan></text>
     </g>
   </g>
 
@@ -116,7 +116,7 @@
       <g id="content-2">
         <text x="0" y="20" class="term cyan">&gt;&gt; fetch --github-stats</text>
         <text x="0" y="50" class="term white">repos: <tspan id="repo_data" class="magenta">16</tspan> | stars: <tspan id="star_data" class="magenta">1</tspan> | prs: <tspan id="prs" class="magenta">--</tspan></text>
-        <text x="0" y="80" class="term white">commits: <tspan id="commit_data" class="magenta">192</tspan> | loc: <tspan id="loc_data" class="magenta">75,890</tspan></text>
+        <text x="0" y="80" class="term white">commits: <tspan id="commit_data" class="magenta">193</tspan> | loc: <tspan id="loc_data" class="magenta">75,890</tspan></text>
         <text x="0" y="110" class="term cyan">&gt;&gt; ls languages/</text>
         <rect x="0" y="133" width="400" height="5" fill="#161b22" rx="4"/>
         <rect x="0" y="133" width="180" height="5" fill="#ff00ff" rx="4"/>
